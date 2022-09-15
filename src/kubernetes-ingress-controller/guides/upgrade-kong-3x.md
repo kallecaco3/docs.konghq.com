@@ -72,23 +72,28 @@ and changes to the PDK that affect custom plugins.
 Kong 3.x's changes to regular expression path handling _do_ require manual
 changes to Ingress configuration. In Kong 2.x, Kong applied a heuristic based
 on the presence of special characters in a route path to determine if a path
-was a regular expression. This heuristic was imperfect and Kong 3.x has
-removed it, instead requiring that any regular expression begin with a `~`
-prefix.
+was a regular expression. This heuristic was imperfect and Kong 3.x has removed
+it, instead requiring that any regular expression begin with a `~` prefix.
 
 Ingress rule paths have no way to indicate that a path is a regular expression.
-The `ImplementationSpecific` path type can contain either regular expression or
-non-regular expression paths. If you have existing Ingresses with regular
-expression paths, those paths will no longer be routed correctly if you upgrade
-to 3.x without updating configuration.
+If you have existing Ingresses with regular expression paths, those paths will
+no longer be routed correctly if you upgrade to 3.x without updating
+configuration.
 
-
-To smooth the migration process and allow users to update rules gradually, KIC
-2.6 includes an option to continue applying the 2.x regular expression
-heuristic on KIC's end. If the option is enabled, the Kong version is 3.0 or
-higher, and a path matches the 2.x heuristic, KIC will insert the `~` prefix
-for you unless the path already begins with `~`. This allows for a mixture of
-paths that have and have not been migrated to 3.x-style configuration.
+When using Kong 3.x, regular expression paths must include the `~` prefix in
+the Ingress `path` field.: the controller will not insert it for you because it
+cannot determine whether an `ImplementationSpecific` path is a regular
+expression path or not (`Exact` and `Prefix` paths must _never_ contain regular
+expressions--the controller generates regular expressions from them and
+starting with a regular expression will result in unexpected behavior).
+However, since Kong 2.x will not route paths with the 3.x prefix correctly, you
+cannot update paths prior to upgrading to 3.x. To smooth the migration process
+and allow path updates after upgrading to 3.x, KIC 2.6 includes an option to
+continue applying the 2.x regular expression heuristic on KIC's end. If the
+option is enabled, the Kong version is 3.0 or higher, and a path matches the
+2.x heuristic, KIC will insert the `~` prefix for you unless the path already
+begins with `~`. This allows for a mixture of paths that have and have not been
+migrated to 3.x-style configuration.
 
 To enable this option, you need to create an IngressClassParameters resource
 with `enableLegacyRegexDetection=true` and attach it to your IngressClass. The
