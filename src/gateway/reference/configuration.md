@@ -3425,6 +3425,7 @@ workspaces.
 - `off` disables any check
 - `path` enforces routes to comply with the pattern described in config
   enforce_route_path_pattern
+- `static` as of Kong version 2.8.1.3 detects static route collisions inside the current workspace, as well as with other workspaces
 
 **Default:** `smart`
 
